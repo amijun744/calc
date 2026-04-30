@@ -3,28 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultima Pro Dashboard</title>
+    <title>Ultima Pro Scientific Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;600&display=swap" rel="stylesheet">
+    <!-- Chart.js for Graphing -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="theme-neon">
     <div class="cursor-glow" id="glow"></div>
 
+    <!-- Sliding Graph Panel -->
+    <div class="graph-panel" id="graph-panel">
+        <div class="graph-header">
+            <span>Function Visualizer</span>
+            <button onclick="toggleGraph()" class="close-btn">×</button>
+        </div>
+        <canvas id="mathChart"></canvas>
+    </div>
+
     <div class="calculator">
-        <!-- Header / Theme & Mode Toggle -->
         <div class="header">
             <div class="theme-bar">
                 <span onclick="setTheme('neon')" class="dot neon"></span>
                 <span onclick="setTheme('sunset')" class="dot sunset"></span>
                 <span onclick="setTheme('midnight')" class="dot midnight"></span>
             </div>
-            <div class="mode-toggle" id="mode-btn" onclick="toggleMode()">Converter Mode</div>
+            <div class="mode-toggle" id="mode-btn" onclick="toggleMode()">Converter</div>
         </div>
 
         <div class="history" id="history">Ready</div>
         <input type="text" class="display" id="display" placeholder="0" disabled>
         
-        <!-- Hidden Converter Controls -->
         <div id="converter-controls" class="converter-row">
             <select id="unit-type" onchange="updateUnitOptions()">
                 <option value="currency">Currency</option>
@@ -39,25 +48,24 @@
         </div>
 
         <div class="buttons">
-            <!-- Row 1: Memory & Scientific -->
+            <!-- Row 1 -->
             <button onclick="memoryClear()" class="mem">MC</button>
             <button onclick="memoryRecall()" class="mem">MR</button>
             <button onclick="memoryAdd()" class="mem">M+</button>
-            <button onclick="calculateLog()" class="sci">log</button>
+            <button onclick="toggleGraph()" class="sci graph-btn">GRAPH</button>
 
-            <!-- Row 2: Scientific -->
+            <!-- Row 2 -->
             <button onclick="calculateFact()" class="sci">x!</button>
             <button onclick="calculateSqrt()" class="sci">√</button>
             <button onclick="appendToDisplay('**2')" class="sci">x²</button>
             <button onclick="appendToDisplay('Math.PI')" class="sci">π</button>
 
-            <!-- Row 3: Advanced Controls -->
+            <!-- Row 3 -->
             <button onclick="calculateSin()" class="sci">sin</button>
             <button onclick="calculateCos()" class="sci">cos</button>
-            <button onclick="appendToDisplay('%')" class="operator">%</button>
+            <button onclick="appendToDisplay('x')" class="sci">x</button>
             <button onclick="clearDisplay()" class="operator ac">AC</button>
             
-            <!-- Standard Pad -->
             <button onclick="appendToDisplay('7')">7</button>
             <button onclick="appendToDisplay('8')">8</button>
             <button onclick="appendToDisplay('9')">9</button>

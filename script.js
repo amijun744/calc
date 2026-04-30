@@ -1,7 +1,7 @@
 const display = document.getElementById('display');
 const historyBox = document.getElementById('history');
 const glow = document.getElementById('glow');
-
+let myChart = null;
 let currentMode = 'calc';
 let memoryValue = 0;
 
@@ -11,13 +11,13 @@ const units = {
     weight: { 'KG': 1, 'LBS': 2.204, 'Grams': 1000, 'Ounces': 35.27 }
 };
 
-// 1. Interactive Mouse Glow
+// 1. Cursor Glow Effect
 document.addEventListener('mousemove', (e) => {
     glow.style.left = e.clientX + 'px';
     glow.style.top = e.clientY + 'px';
 });
 
-// 2. Audio Feedback Engine
+// 2. Audio Engine
 function playClick() {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -28,20 +28,77 @@ function playClick() {
     osc.start(); osc.stop(ctx.currentTime + 0.1);
 }
 
-// 3. Mode Toggle Logic
+// 3. Graphing Logic
+function toggleGraph() {
+    const panel = document.getElementById('graph-panel');
+    panel.classList.toggle('active');
+    if (panel.classList.contains('active')) drawGraph();
+}
+
+function drawGraph() {
+    const ctx = document.getElementById('mathChart').getContext('2d');
+    let xValues = [];
+    let yValues = [];
+    
+    // Replace human readable math with JS Math object
+    let expr = display.value.replace(/sin/g, 'Math.sin').replace(/cos/g, 'Math.cos').replace(/log/g, 'Math.log10');
+
+    for (let x = -10; x <= 10; x += 0.5) {
+        xValues.push(x);
+        try {
+            // Evaluates the expression by replacing x with the current loop value
+            let val = eval(expr.replace(/x/g, `(${x})`));
+            yValues.push(val);
+        } catch (e) { yValues.push(null); }
+    }
+
+    if (myChart) myChart.destroy();
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: xValues,
+            datasets: [{
+                label: `f(x) = ${display.value}`,
+                data: yValues,
+                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { grid: { color: 'rgba(255,255,255,0.05)' } }
+            }
+        }
+    });
+}
+
+// 4. Core Calculator & Mode Switching
+function appendToDisplay(val) { playClick(); display.value += val; }
+function clearDisplay() { playClick(); display.value = ""; }
+function calculate() {
+    if (currentMode === 'calc') {
+        try {
+            let res = eval(display.value.replace(/sin/g, 'Math.sin').replace(/cos/g, 'Math.cos'));
+            historyBox.innerText = display.value + " =";
+            display.value = Number.isInteger(res) ? res : res.toFixed(4);
+        } catch { display.value = "Error"; }
+    } else {
+        const type = document.getElementById('unit-type').value;
+        const from = document.getElementById('from-unit').value;
+        const to = document.getElementById('to-unit').value;
+        const res = (parseFloat(display.value) / units[type][from]) * units[type][to];
+        display.value = res.toFixed(2);
+    }
+}
+
 function toggleMode() {
     const controls = document.getElementById('converter-controls');
-    const btn = document.getElementById('mode-btn');
-    if (currentMode === 'calc') {
-        currentMode = 'convert';
-        controls.style.display = 'flex';
-        btn.innerText = 'Calculator Mode';
-        updateUnitOptions();
-    } else {
-        currentMode = 'calc';
-        controls.style.display = 'none';
-        btn.innerText = 'Converter Mode';
-    }
+    currentMode = (currentMode === 'calc') ? 'convert' : 'calc';
+    controls.style.display = (currentMode === 'convert') ? 'flex' : 'none';
+    if(currentMode === 'convert') updateUnitOptions();
 }
 
 function updateUnitOptions() {
@@ -52,43 +109,8 @@ function updateUnitOptions() {
     from.innerHTML = opts; to.innerHTML = opts;
 }
 
-// 4. Core Calculator Actions
-function appendToDisplay(val) { playClick(); display.value += val; }
-function clearDisplay() { playClick(); display.value = ""; historyBox.innerText = "Cleared"; }
-function deleteLast() { display.value = display.value.slice(0, -1); }
-
-function calculate() {
-    if (currentMode === 'calc') {
-        try {
-            let res = eval(display.value);
-            historyBox.innerText = display.value + " =";
-            display.value = Number.isInteger(res) ? res : res.toFixed(4);
-        } catch { display.value = "Error"; }
-    } else {
-        const type = document.getElementById('unit-type').value;
-        const from = document.getElementById('from-unit').value;
-        const to = document.getElementById('to-unit').value;
-        const val = parseFloat(display.value);
-        if (isNaN(val)) return;
-        const res = (val / units[type][from]) * units[type][to];
-        historyBox.innerText = `${val} ${from} to ${to}`;
-        display.value = res.toFixed(type === 'currency' ? 2 : 4);
-    }
-}
-
-// 5. Memory & Themes
+// 5. Themes & Memory
+function setTheme(t) { document.body.className = 'theme-' + t; }
 function memoryAdd() { memoryValue += parseFloat(display.value || 0); clearDisplay(); }
 function memoryRecall() { display.value = memoryValue; }
 function memoryClear() { memoryValue = 0; }
-function setTheme(t) { document.body.className = 'theme-' + t; }
-
-// 6. Scientific Logic
-function calculateFact() {
-    let n = parseInt(display.value);
-    let f = 1; for(let i=1; i<=n; i++) f *= i;
-    display.value = f;
-}
-function calculateSqrt() { display.value = Math.sqrt(eval(display.value)).toFixed(4); }
-function calculateLog() { display.value = Math.log10(eval(display.value)).toFixed(4); }
-function calculateSin() { display.value = Math.sin(eval(display.value) * Math.PI/180).toFixed(4); }
-function calculateCos() { display.value = Math.cos(eval(display.value) * Math.PI/180).toFixed(4); }
