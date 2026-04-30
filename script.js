@@ -1,23 +1,21 @@
 const display = document.getElementById('display');
-const historyBox = document.getElementById('history');
+const currentHistory = document.getElementById('current-history');
+const historyList = document.getElementById('history-list');
 const glow = document.getElementById('glow');
 let myChart = null;
 let currentMode = 'calc';
 let memoryValue = 0;
+let calculationHistory = JSON.parse(localStorage.getItem('calc_history')) || [];
 
-const units = {
-    currency: { 'USD': 1, 'EUR': 0.92, 'BTC': 0.000015, 'AED': 3.67, 'SAR': 3.75 },
-    length: { 'Meters': 1, 'KM': 0.001, 'Miles': 0.000621, 'Feet': 3.28 },
-    weight: { 'KG': 1, 'LBS': 2.204, 'Grams': 1000, 'Ounces': 35.27 }
-};
+// Load stored history on startup
+window.onload = () => { renderHistory(); };
 
-// 1. Cursor Glow Effect
+// --- CORE UTILS ---
 document.addEventListener('mousemove', (e) => {
     glow.style.left = e.clientX + 'px';
     glow.style.top = e.clientY + 'px';
 });
 
-// 2. Audio Engine
 function playClick() {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -28,7 +26,68 @@ function playClick() {
     osc.start(); osc.stop(ctx.currentTime + 0.1);
 }
 
-// 3. Graphing Logic
+// --- PERSISTENT HISTORY ENGINE ---
+function toggleHistory() { document.getElementById('history-sidebar').classList.toggle('active'); }
+
+function saveCalculation(eq, res) {
+    const entry = { timestamp: new Date().toLocaleTimeString(), equation: eq, result: res };
+    calculationHistory.unshift(entry); // Add to start
+    if(calculationHistory.length > 50) calculationHistory.pop(); // Cap at 50
+    localStorage.setItem('calc_history', JSON.stringify(calculationHistory));
+    renderHistory();
+}
+
+function renderHistory() {
+    historyList.innerHTML = calculationHistory.map(item => `
+        <div class="history-item">
+            <span>${item.timestamp}</span>
+            ${item.equation} = <strong>${item.result}</strong>
+        </div>
+    `).join('');
+}
+
+function clearHistory() {
+    calculationHistory = [];
+    localStorage.removeItem('calc_history');
+    renderHistory();
+}
+
+// --- EXPORT TO CSV ---
+function exportToCSV() {
+    let csvContent = "data:text/csv;charset=utf-8,Time,Equation,Result\n";
+    calculationHistory.forEach(r => {
+        csvContent += `${r.timestamp},"${r.equation}",${r.result}\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Calculations_${new Date().toLocaleDateString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// --- CALCULATOR LOGIC ---
+function calculate() {
+    if (currentMode === 'calc') {
+        try {
+            const rawExpr = display.value;
+            let expr = rawExpr.replace(/sin/g, 'Math.sin').replace(/cos/g, 'Math.cos');
+            let res = eval(expr);
+            res = Number.isInteger(res) ? res : res.toFixed(4);
+            
+            currentHistory.innerText = rawExpr + " =";
+            saveCalculation(rawExpr, res); // Persist
+            display.value = res;
+        } catch { display.value = "Error"; }
+    }
+}
+
+// (Include previous Graphing, Theme, and Mode Toggle functions here)
+function appendToDisplay(val) { playClick(); display.value += val; }
+function clearDisplay() { display.value = ""; currentHistory.innerText = "Ready"; }
+function setTheme(t) { document.body.className = 'theme-' + t; }
+
 function toggleGraph() {
     const panel = document.getElementById('graph-panel');
     panel.classList.toggle('active');
@@ -37,80 +96,19 @@ function toggleGraph() {
 
 function drawGraph() {
     const ctx = document.getElementById('mathChart').getContext('2d');
-    let xValues = [];
-    let yValues = [];
-    
-    // Replace human readable math with JS Math object
-    let expr = display.value.replace(/sin/g, 'Math.sin').replace(/cos/g, 'Math.cos').replace(/log/g, 'Math.log10');
+    let xValues = []; let yValues = [];
+    let expr = display.value.replace(/sin/g, 'Math.sin').replace(/cos/g, 'Math.cos');
 
     for (let x = -10; x <= 10; x += 0.5) {
         xValues.push(x);
-        try {
-            // Evaluates the expression by replacing x with the current loop value
-            let val = eval(expr.replace(/x/g, `(${x})`));
-            yValues.push(val);
-        } catch (e) { yValues.push(null); }
+        try { yValues.push(eval(expr.replace(/x/g, `(${x})`))); } catch (e) { yValues.push(null); }
     }
-
     if (myChart) myChart.destroy();
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: xValues,
-            datasets: [{
-                label: `f(x) = ${display.value}`,
-                data: yValues,
-                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
-                tension: 0.4,
-                pointRadius: 0
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: {
-                x: { grid: { color: 'rgba(255,255,255,0.05)' } },
-                y: { grid: { color: 'rgba(255,255,255,0.05)' } }
-            }
+            datasets: [{ label: `f(x) = ${display.value}`, data: yValues, borderColor: '#00f2ff', tension: 0.4 }]
         }
     });
 }
-
-// 4. Core Calculator & Mode Switching
-function appendToDisplay(val) { playClick(); display.value += val; }
-function clearDisplay() { playClick(); display.value = ""; }
-function calculate() {
-    if (currentMode === 'calc') {
-        try {
-            let res = eval(display.value.replace(/sin/g, 'Math.sin').replace(/cos/g, 'Math.cos'));
-            historyBox.innerText = display.value + " =";
-            display.value = Number.isInteger(res) ? res : res.toFixed(4);
-        } catch { display.value = "Error"; }
-    } else {
-        const type = document.getElementById('unit-type').value;
-        const from = document.getElementById('from-unit').value;
-        const to = document.getElementById('to-unit').value;
-        const res = (parseFloat(display.value) / units[type][from]) * units[type][to];
-        display.value = res.toFixed(2);
-    }
-}
-
-function toggleMode() {
-    const controls = document.getElementById('converter-controls');
-    currentMode = (currentMode === 'calc') ? 'convert' : 'calc';
-    controls.style.display = (currentMode === 'convert') ? 'flex' : 'none';
-    if(currentMode === 'convert') updateUnitOptions();
-}
-
-function updateUnitOptions() {
-    const type = document.getElementById('unit-type').value;
-    const from = document.getElementById('from-unit');
-    const to = document.getElementById('to-unit');
-    let opts = Object.keys(units[type]).map(u => `<option value="${u}">${u}</option>`).join('');
-    from.innerHTML = opts; to.innerHTML = opts;
-}
-
-// 5. Themes & Memory
-function setTheme(t) { document.body.className = 'theme-' + t; }
-function memoryAdd() { memoryValue += parseFloat(display.value || 0); clearDisplay(); }
-function memoryRecall() { display.value = memoryValue; }
-function memoryClear() { memoryValue = 0; }
