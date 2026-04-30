@@ -1,60 +1,85 @@
-const display = document.getElementById('display');
-const historyBox = document.getElementById('history');
-const glow = document.getElementById('glow');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultima Pro Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;600&display=swap" rel="stylesheet">
+</head>
+<body class="theme-neon">
+    <div class="cursor-glow" id="glow"></div>
 
-// Mouse movement effect
-document.addEventListener('mousemove', (e) => {
-    glow.style.left = e.clientX + 'px';
-    glow.style.top = e.clientY + 'px';
-});
+    <div class="calculator">
+        <!-- Header / Theme & Mode Toggle -->
+        <div class="header">
+            <div class="theme-bar">
+                <span onclick="setTheme('neon')" class="dot neon"></span>
+                <span onclick="setTheme('sunset')" class="dot sunset"></span>
+                <span onclick="setTheme('midnight')" class="dot midnight"></span>
+            </div>
+            <div class="mode-toggle" id="mode-btn" onclick="toggleMode()">Converter Mode</div>
+        </div>
 
-function appendToDisplay(input) {
-    if (display.value === "Error") clearDisplay();
-    display.value += input;
-}
-
-function clearDisplay() {
-    display.value = "";
-}
-
-function deleteLast() {
-    display.value = display.value.slice(0, -1);
-}
-
-function calculate() {
-    try {
-        let expression = display.value;
-        let result = eval(expression);
+        <div class="history" id="history">Ready</div>
+        <input type="text" class="display" id="display" placeholder="0" disabled>
         
-        historyBox.innerText = `${expression} =`;
-        display.value = Number.isInteger(result) ? result : result.toFixed(4);
-    } catch (e) {
-        display.value = "Error";
-    }
-}
+        <!-- Hidden Converter Controls -->
+        <div id="converter-controls" class="converter-row">
+            <select id="unit-type" onchange="updateUnitOptions()">
+                <option value="currency">Currency</option>
+                <option value="length">Length</option>
+                <option value="weight">Weight</option>
+            </select>
+            <div class="unit-selectors">
+                <select id="from-unit"></select>
+                <span class="to-arrow">→</span>
+                <select id="to-unit"></select>
+            </div>
+        </div>
 
-// --- Advanced Math ---
+        <div class="buttons">
+            <!-- Row 1: Memory & Scientific -->
+            <button onclick="memoryClear()" class="mem">MC</button>
+            <button onclick="memoryRecall()" class="mem">MR</button>
+            <button onclick="memoryAdd()" class="mem">M+</button>
+            <button onclick="calculateLog()" class="sci">log</button>
 
-function calculateSqrt() {
-    display.value = Math.sqrt(eval(display.value)).toFixed(4);
-}
+            <!-- Row 2: Scientific -->
+            <button onclick="calculateFact()" class="sci">x!</button>
+            <button onclick="calculateSqrt()" class="sci">√</button>
+            <button onclick="appendToDisplay('**2')" class="sci">x²</button>
+            <button onclick="appendToDisplay('Math.PI')" class="sci">π</button>
 
-function calculateLog() {
-    display.value = Math.log10(eval(display.value)).toFixed(4);
-}
+            <!-- Row 3: Advanced Controls -->
+            <button onclick="calculateSin()" class="sci">sin</button>
+            <button onclick="calculateCos()" class="sci">cos</button>
+            <button onclick="appendToDisplay('%')" class="operator">%</button>
+            <button onclick="clearDisplay()" class="operator ac">AC</button>
+            
+            <!-- Standard Pad -->
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button onclick="appendToDisplay('/')" class="operator">÷</button>
+            
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendToDisplay('*')" class="operator">×</button>
+            
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button onclick="appendToDisplay('-')" class="operator">−</button>
+            
+            <button onclick="appendToDisplay('0')" class="zero">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="appendToDisplay('+')" class="operator">+</button>
+            <button onclick="calculate()" class="equals">=</button>
+        </div>
+    </div>
 
-function calculateSin() {
-    display.value = Math.sin(eval(display.value) * (Math.PI / 180)).toFixed(4);
-}
-
-function calculateCos() {
-    display.value = Math.cos(eval(display.value) * (Math.PI / 180)).toFixed(4);
-}
-
-function calculateFact() {
-    let num = parseInt(eval(display.value));
-    if (num < 0) return display.value = "Error";
-    let fact = 1;
-    for (let i = 1; i <= num; i++) fact *= i;
-    display.value = fact;
-}
+    <script src="script.js"></script>
+</body>
+</html>
