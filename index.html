@@ -3,19 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Calculator</title>
+    <title>Premium Glass Calculator</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Using Inter font for that premium tech look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="calculator">
-        <input type="text" class="display" id="display" disabled>
+        <input type="text" class="display" id="display" placeholder="0" disabled>
+        
         <div class="buttons">
-            <button onclick="clearDisplay()" class="operator">C</button>
+            <!-- Scientific Functions -->
+            <button onclick="calculateSqrt()" class="sci">√</button>
+            <button onclick="appendToDisplay('**')" class="sci">xⁿ</button>
+            <button onclick="calculateSin()" class="sci">sin</button>
+            <button onclick="calculateCos()" class="sci">cos</button>
+
+            <!-- Control Row -->
+            <button onclick="clearDisplay()" class="operator">AC</button>
+            <button onclick="deleteLast()" class="operator">DEL</button>
             <button onclick="appendToDisplay('/')" class="operator">÷</button>
             <button onclick="appendToDisplay('*')" class="operator">×</button>
-            <button onclick="deleteLast()" class="operator">DEL</button>
             
+            <!-- Number Pad & Operators -->
             <button onclick="appendToDisplay('7')">7</button>
             <button onclick="appendToDisplay('8')">8</button>
             <button onclick="appendToDisplay('9')">9</button>
@@ -29,6 +40,8 @@
             <button onclick="appendToDisplay('1')">1</button>
             <button onclick="appendToDisplay('2')">2</button>
             <button onclick="appendToDisplay('3')">3</button>
+            
+            <!-- Equals Span -->
             <button onclick="calculate()" class="equals">=</button>
             
             <button onclick="appendToDisplay('0')" class="zero">0</button>
