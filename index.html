@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultima Pro | Data Dashboard</title>
+    <title>Ultima Pro | TypeScript Edition</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -47,11 +47,10 @@
         <div class="current-history" id="current-history">Ready</div>
         <input type="text" class="display" id="display" placeholder="0" disabled>
         
-        <div id="converter-controls" class="converter-row">
+        <div id="converter-controls" class="converter-row" style="display:none">
             <select id="unit-type" onchange="updateUnitOptions()">
                 <option value="currency">Currency</option>
                 <option value="length">Length</option>
-                <option value="weight">Weight</option>
             </select>
             <div class="unit-selectors">
                 <select id="from-unit"></select>
@@ -61,16 +60,19 @@
         </div>
 
         <div class="buttons">
+            <!-- Row 1 -->
             <button onclick="memoryClear()" class="mem">MC</button>
             <button onclick="memoryRecall()" class="mem">MR</button>
             <button onclick="memoryAdd()" class="mem">M+</button>
             <button onclick="toggleGraph()" class="sci graph-btn">GRAPH</button>
 
+            <!-- Row 2 -->
             <button onclick="calculateFact()" class="sci">x!</button>
             <button onclick="calculateSqrt()" class="sci">√</button>
             <button onclick="appendToDisplay('**2')" class="sci">x²</button>
             <button onclick="appendToDisplay('Math.PI')" class="sci">π</button>
 
+            <!-- Row 3 -->
             <button onclick="calculateSin()" class="sci">sin</button>
             <button onclick="calculateCos()" class="sci">cos</button>
             <button onclick="appendToDisplay('x')" class="sci">x</button>
@@ -92,12 +94,13 @@
             <button onclick="appendToDisplay('-')" class="operator">−</button>
             
             <button onclick="appendToDisplay('0')" class="zero">0</button>
-            <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="appendToDisplay('.')" class="dot">.</button>
             <button onclick="appendToDisplay('+')" class="operator">+</button>
             <button onclick="calculate()" class="equals">=</button>
         </div>
     </div>
 
+    <!-- Use type="module" if you are using a transpiler, otherwise use compiled JS -->
     <script src="script.js"></script>
 </body>
 </html>
