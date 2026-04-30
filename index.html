@@ -3,49 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Glass Calculator</title>
+    <title>Pro Glass Calculator</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Using Inter font for that premium tech look -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Mouse Follower Background -->
+    <div class="cursor-glow" id="glow"></div>
 
     <div class="calculator">
+        <div class="history" id="history">Recent: ---</div>
         <input type="text" class="display" id="display" placeholder="0" disabled>
         
         <div class="buttons">
-            <!-- Scientific Functions -->
+            <!-- Advanced Row 1 -->
+            <button onclick="calculateLog()" class="sci">log</button>
+            <button onclick="calculateFact()" class="sci">x!</button>
+            <button onclick="appendToDisplay('**2')" class="sci">x²</button>
+            <button onclick="appendToDisplay('Math.PI')" class="sci">π</button>
+
+            <!-- Advanced Row 2 -->
             <button onclick="calculateSqrt()" class="sci">√</button>
             <button onclick="appendToDisplay('**')" class="sci">xⁿ</button>
             <button onclick="calculateSin()" class="sci">sin</button>
             <button onclick="calculateCos()" class="sci">cos</button>
 
             <!-- Control Row -->
-            <button onclick="clearDisplay()" class="operator">AC</button>
+            <button onclick="clearDisplay()" class="operator ac">AC</button>
             <button onclick="deleteLast()" class="operator">DEL</button>
+            <button onclick="appendToDisplay('%')" class="operator">%</button>
             <button onclick="appendToDisplay('/')" class="operator">÷</button>
-            <button onclick="appendToDisplay('*')" class="operator">×</button>
             
-            <!-- Number Pad & Operators -->
             <button onclick="appendToDisplay('7')">7</button>
             <button onclick="appendToDisplay('8')">8</button>
             <button onclick="appendToDisplay('9')">9</button>
-            <button onclick="appendToDisplay('-')" class="operator">-</button>
+            <button onclick="appendToDisplay('*')" class="operator">×</button>
             
             <button onclick="appendToDisplay('4')">4</button>
             <button onclick="appendToDisplay('5')">5</button>
             <button onclick="appendToDisplay('6')">6</button>
-            <button onclick="appendToDisplay('+')" class="operator">+</button>
+            <button onclick="appendToDisplay('-')" class="operator">-</button>
             
             <button onclick="appendToDisplay('1')">1</button>
             <button onclick="appendToDisplay('2')">2</button>
             <button onclick="appendToDisplay('3')">3</button>
-            
-            <!-- Equals Span -->
-            <button onclick="calculate()" class="equals">=</button>
+            <button onclick="appendToDisplay('+')" class="operator">+</button>
             
             <button onclick="appendToDisplay('0')" class="zero">0</button>
-            <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="appendToDisplay('.')" class="dot">.</button>
+            <button onclick="calculate()" class="equals">=</button>
         </div>
     </div>
 

@@ -1,54 +1,60 @@
 const display = document.getElementById('display');
+const historyBox = document.getElementById('history');
+const glow = document.getElementById('glow');
 
-// Adds numbers/operators to the screen
+// Mouse movement effect
+document.addEventListener('mousemove', (e) => {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+});
+
 function appendToDisplay(input) {
+    if (display.value === "Error") clearDisplay();
     display.value += input;
 }
 
-// Clears everything
 function clearDisplay() {
     display.value = "";
 }
 
-// Deletes the last character typed
 function deleteLast() {
     display.value = display.value.slice(0, -1);
 }
 
-// Main calculation logic
 function calculate() {
     try {
-        // Use eval safely for simple calculator strings
-        let result = eval(display.value);
+        let expression = display.value;
+        let result = eval(expression);
         
-        // Check if result is a number and fix decimals
-        if (!isNaN(result)) {
-            display.value = Number.isInteger(result) ? result : result.toFixed(4);
-        }
-    } catch (error) {
+        historyBox.innerText = `${expression} =`;
+        display.value = Number.isInteger(result) ? result : result.toFixed(4);
+    } catch (e) {
         display.value = "Error";
-        setTimeout(clearDisplay, 1500); // Reset after error
     }
 }
 
-/* --- Scientific Functions --- */
+// --- Advanced Math ---
 
 function calculateSqrt() {
-    if (display.value) {
-        display.value = Math.sqrt(eval(display.value)).toFixed(4);
-    }
+    display.value = Math.sqrt(eval(display.value)).toFixed(4);
+}
+
+function calculateLog() {
+    display.value = Math.log10(eval(display.value)).toFixed(4);
 }
 
 function calculateSin() {
-    if (display.value) {
-        // Converts degrees to radians
-        display.value = Math.sin(eval(display.value) * (Math.PI / 180)).toFixed(4);
-    }
+    display.value = Math.sin(eval(display.value) * (Math.PI / 180)).toFixed(4);
 }
 
 function calculateCos() {
-    if (display.value) {
-        // Converts degrees to radians
-        display.value = Math.cos(eval(display.value) * (Math.PI / 180)).toFixed(4);
-    }
+    display.value = Math.cos(eval(display.value) * (Math.PI / 180)).toFixed(4);
+}
+
+function calculateFact() {
+    let num = parseInt(eval(display.value));
+    if (num < 0) return display.value = "Error";
+    let fact = 1;
+    for (let i = 1; i <= num; i++) fact *= i;
+    display.value = fact;
 }
