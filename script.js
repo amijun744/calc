@@ -2,59 +2,67 @@ const display = document.getElementById('display');
 const historyBox = document.getElementById('history');
 const glow = document.getElementById('glow');
 
-// Mouse movement effect
+let memoryValue = 0;
+
+// Dynamic Mouse Glow
 document.addEventListener('mousemove', (e) => {
     glow.style.left = e.clientX + 'px';
     glow.style.top = e.clientY + 'px';
 });
 
-function appendToDisplay(input) {
-    if (display.value === "Error") clearDisplay();
-    display.value += input;
+// Audio Feedback (Short sine wave beep)
+function playClick() {
+    const context = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = context.createOscillator();
+    const gain = context.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.1);
+    osc.connect(gain);
+    gain.connect(context.destination);
+    osc.start();
+    osc.stop(context.currentTime + 0.1);
+}
+
+function appendToDisplay(val) {
+    playClick();
+    display.value += val;
 }
 
 function clearDisplay() {
+    playClick();
     display.value = "";
-}
-
-function deleteLast() {
-    display.value = display.value.slice(0, -1);
 }
 
 function calculate() {
     try {
-        let expression = display.value;
-        let result = eval(expression);
-        
-        historyBox.innerText = `${expression} =`;
+        let result = eval(display.value);
+        historyBox.innerText = display.value + " =";
         display.value = Number.isInteger(result) ? result : result.toFixed(4);
-    } catch (e) {
+    } catch {
         display.value = "Error";
     }
 }
 
-// --- Advanced Math ---
+// Memory Functions
+function memoryAdd() { memoryValue += parseFloat(display.value || 0); clearDisplay(); }
+function memoryRecall() { display.value = memoryValue; }
+function memoryClear() { memoryValue = 0; }
 
-function calculateSqrt() {
-    display.value = Math.sqrt(eval(display.value)).toFixed(4);
+// Theme Logic
+function setTheme(theme) {
+    document.body.className = 'theme-' + theme;
 }
 
-function calculateLog() {
-    display.value = Math.log10(eval(display.value)).toFixed(4);
-}
-
-function calculateSin() {
-    display.value = Math.sin(eval(display.value) * (Math.PI / 180)).toFixed(4);
-}
-
-function calculateCos() {
-    display.value = Math.cos(eval(display.value) * (Math.PI / 180)).toFixed(4);
-}
-
+// Advanced Math
 function calculateFact() {
-    let num = parseInt(eval(display.value));
-    if (num < 0) return display.value = "Error";
-    let fact = 1;
-    for (let i = 1; i <= num; i++) fact *= i;
-    display.value = fact;
+    let n = parseInt(display.value);
+    let f = 1;
+    for(let i=1; i<=n; i++) f *= i;
+    display.value = f;
 }
+
+function calculateSqrt() { display.value = Math.sqrt(eval(display.value)).toFixed(4); }
+function calculateLog() { display.value = Math.log10(eval(display.value)).toFixed(4); }
+function calculateSin() { display.value = Math.sin(eval(display.value) * Math.PI/180).toFixed(4); }
+function calculateCos() { display.value = Math.cos(eval(display.value) * Math.PI/180).toFixed(4); }
